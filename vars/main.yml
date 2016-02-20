@@ -1,3 +1,5 @@
+---
+
 packages_list:
   - compat-libcap1
   - gcc
@@ -21,6 +23,7 @@ packages_list:
   - sysstat
   - unixODBC
   - unzip
+
 kernel_params:
 # Shared memory and semaphore
 # look for document 226209.1 in oracle support for details
@@ -58,3 +61,41 @@ hard_stack: 32768
 # mem lock 90% of RAM
 soft_memlock: 1887437
 hard_memlock: 1887437
+
+
+
+
+
+#
+# Infra vars
+#
+extra_groups:
+  - dba
+  - oper
+oracle_dba_group: dba
+oracle_oper_group: oper
+oracle_database_type: 'GENERAL_PURPOSE'
+oracle_globalname: 'orcl.oradb3.private'
+oracle_sid: 'orcl'
+create_container_database: 'true'
+number_of_pdbs: '1'
+oracle_conf_as_container_db: 'true'
+pdb_prefix: 'pdb'
+oracle_pdb_name: 'pdb_01'
+oracle_charset: 'AL32UTF8'
+oracle_memory_option: 'false'
+# memory target
+oracle_memory_mb: 1536
+oracle_install_samples: 'false'
+oracle_management_option: 'DEFAULT'
+oracle_enable_recovery: 'true'
+oracle_storage_type: 'FILE_SYSTEM_STORAGE'
+oracle_decline_security_updates: 'yes'
+hugepages_nr: 578
+
+# Username of the host machine. We use it for restart the vagrant machine
+#host_username: chris
+
+#
+# db-vars
+#

@@ -13,7 +13,7 @@
 
 # ==> extract files
 - name: Extract installation files
-  command: 'unzip {{ installation_folder }}/{{ item }} -d {{ installation_folder }}/'
+  command: 'unzip -o {{ installation_folder }}/{{ item }} -d {{ installation_folder }}/'
   with_items: '{{ installer_archives }}'
 
 # ==> generate response file
