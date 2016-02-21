@@ -1,101 +1,73 @@
 ---
 
-packages_list:
-  - compat-libcap1
-  - gcc
-  - gcc-c++
-  - glibc
-  - glibc.i686
-  - glibc-devel
-  - glibc-devel.i686
-  - ksh
-  - libaio.i686
-  - libaio-devel
-  - libaio-devel.i686
-  #- libgcc.i686
-  - libstdc++.i686
-  - libstdc++-devel
-  - libstdc++-devel.i686
-  - libXi
-  - libXi.i686
-  - libXtst
-  - libXtst.i686
-  - sysstat
-  - unixODBC
-  - unzip
+rh:
+  packages_depends:
+    - compat-libcap1
+    - gcc
+    - gcc-c++
+    - glibc
+    - glibc.i686
+    - glibc-devel
+    - glibc-devel.i686
+    - ksh
+    - libaio.i686
+    - libaio-devel
+    - libaio-devel.i686
+    - libstdc++.i686
+    - libstdc++-devel
+    - libstdc++-devel.i686
+    - libXi
+    - libXi.i686
+    - libXtst
+    - libXtst.i686
+    - sysstat
+    - unixODBC
+    - unzip
+
+oracle_system_group: oinstall
+oracle_system_user: oracle
+oracle_extra_groups:
+  - dba
+  - oper
+
+oracle_dba_group: dba
+oracle_oper_group: oper
 
 kernel_params:
-# Shared memory and semaphore
-# look for document 226209.1 in oracle support for details
+  # Shared memory and semaphore
+  # look for document 226209.1 in oracle support for details
   kernel.sem: 250 32000 100 128
   kernel.shmmni: 4096
-# 1.5 GB Shared memory 500mb for linux kernel (for 2GB virtual machine)
+  # 1.5 GB Shared memory 500mb for linux kernel (for 2GB virtual machine)
   kernel.shmall: 393216
-# 1 GB Half of the physical memory (for 2GB virtual machine)
+  # 1 GB Half of the physical memory (for 2GB virtual machine)
   kernel.shmmax: 4398046511104
-# For 1Gbps with 1ms latency 16MB buffer
+  # For 1Gbps with 1ms latency 16MB buffer
   net.core.rmem_max: 16777216
   net.core.wmem_max: 16777216
   net.ipv4.tcp_rmem: 4096 87380 16777216
   net.ipv4.tcp_wmem: 4096 65536 16777216
-# Minimize swap file use
+  # Minimize swap file use
   vm.swappiness: 10
   vm.dirty_background_ratio: 5
   vm.dirty_ratio: 10
-# Max open file descriptors 512 * db processes + room for os
+  # Max open file descriptors 512 * db processes + room for os
   fs.file-max: 409600
-# Shorten keep alive of connections
+  # Shorten keep alive of connections
   net.ipv4.tcp_keepalive_time: 300
   net.ipv4.tcp_keepalive_intvl: 60
   net.ipv4.tcp_keepalive_probes: 10
-# maximize port range
+  # maximize port range
   net.ipv4.ip_local_port_range: 9000 65500
 
-# Oracle user limits
-soft_no_file: 4096
-hard_no_file: 65536
-soft_nproc: 2047
-hard_nproc: 16384
-soft_stack: 10240
-hard_stack: 32768
-# mem lock 90% of RAM
-soft_memlock: 1887437
-hard_memlock: 1887437
-
-
-
-
-
-#
-# Infra vars
-#
-extra_groups:
-  - dba
-  - oper
-oracle_dba_group: dba
-oracle_oper_group: oper
-oracle_database_type: 'GENERAL_PURPOSE'
-oracle_globalname: 'orcl.oradb3.private'
-oracle_sid: 'orcl'
-create_container_database: 'true'
-number_of_pdbs: '1'
-oracle_conf_as_container_db: 'true'
-pdb_prefix: 'pdb'
-oracle_pdb_name: 'pdb_01'
-oracle_charset: 'AL32UTF8'
-oracle_memory_option: 'false'
-# memory target
-oracle_memory_mb: 1536
-oracle_install_samples: 'false'
-oracle_management_option: 'DEFAULT'
-oracle_enable_recovery: 'true'
-oracle_storage_type: 'FILE_SYSTEM_STORAGE'
-oracle_decline_security_updates: 'yes'
-hugepages_nr: 578
-
-# Username of the host machine. We use it for restart the vagrant machine
-#host_username: chris
-
-#
-# db-vars
-#
+sys_config:
+  hugepages_nr: 578
+  limits:
+    - { limit: 'soft', type: nofile, value: 4096 }
+    - { limit: 'hard', type: nofile, value: 65536 }
+    - { limit: 'soft', type: nproc, value: 2047 }
+    - { limit: 'hard', type: nproc, value: 16384 }
+    - { limit: 'soft', type: stack, value: 10240 }
+    - { limit: 'hard', type: stack, value: 32768 }
+    - { limit: 'soft', type: memlock, value: 1887437 }
+    - { limit: 'hard', type: memlock, value: 1887437 }

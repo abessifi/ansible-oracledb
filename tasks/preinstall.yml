@@ -1,54 +1,44 @@
-################################################################################
-# ==> Task Required for Configure Linux to host Oracle Database 12c
-# ==> Supports version 12.1.0.2
-# ==> Author: Christos Vezalis
-################################################################################
+---
 
-# ==> Configure Linux
-- name: Install required libraries
+# Configure Linux
+- name: RedHat | Install required packages
   yum: name={{ item }} state=present
-  with_items: packages_list
+  with_items: rh.packages_depends
 
 - name: Disable SELinux
   selinux: state=disabled
 
-# ==> Create users and groups
-- name: Create groups
-  group: name={{ oracle_install_group }} state=present
-- name: add extra groups
+# Create users and groups
+- name: Create oracle group
+  group: name={{ oracle_system_group }} state=present
+
+- name: Add oracle extra groups
   group: name={{ item }} state=present
-  with_items: extra_groups
-- name: Create user
-  user: name={{ oracle_user }} group={{ oracle_install_group }} password={{ oracle_os_user_pass }}
-- name: Add extra groups
-  user: name={{ oracle_user }} groups={{ item }} append=yes
-  with_items: extra_groups
+  with_items: oracle_extra_groups
 
-# ==> Add limits for oracle user
-- name: Add oracle user limits
-  lineinfile: dest=/etc/security/limits.conf line='{{ oracle_user }} {{ item.limit }} {{ item.type}} {{ item.value }}'
-  with_items:
-    - { limit: 'soft', type: nofile, value: '{{ soft_no_file }}' }
-    - { limit: 'hard', type: nofile, value: '{{ hard_no_file }}' }
-    - { limit: 'soft', type: nproc, value: '{{ soft_nproc }}' }
-    - { limit: 'hard', type: nproc, value: '{{ hard_nproc }}' }
-    - { limit: 'soft', type: stack, value: '{{ soft_stack }}' }
-    - { limit: 'hard', type: stack, value: '{{ hard_stack }}' }
-    - { limit: 'soft', type: memlock, value: '{{ soft_memlock }}' }
-    - { limit: 'hard', type: memlock, value: '{{ hard_memlock }}' }
+- name: Create oracle user
+  user: name={{ oracle_system_user }} group={{ oracle_system_group }} password={{ oracle_system_user_password }}
 
-# ==> Create Base directories
 - name: Create Oracle Base directory
-  file: state=directory path={{ oracle_base }} owner={{ oracle_user }} group={{ oracle_install_group }}
+  file: state=directory path={{ oracle_base_dir }} owner={{ oracle_system_user }} group={{ oracle_system_group }}
 
-# ==> Disable transparent hugepages
-- name: Copy script
-  copy: src=disable_trans_hugepages.sh dest='~/disable_trans_hugepages.sh' mode=755
+- name: Add oracle extra groups
+  user: name={{ oracle_system_user }} groups={{ item }} append=yes
+  with_items: oracle_extra_groups
+
+- name: Add oracle user limits
+  lineinfile: dest=/etc/security/limits.conf line="{{ oracle_system_user }} {{ item.limit }} {{ item.type}} {{ item.value }}"
+  with_items: sys_config.limits
+
+# Disable transparent hugepages
+- name: Copy script to disable transparent hugepages
+  copy: src=disable_trans_hugepages.sh dest='/tmp/disable_trans_hugepages.sh' mode=755
+
 - name: Disable Transparent Huge Pages
-  shell: '~/disable_trans_hugepages.sh'
+  shell: '/tmp/disable_trans_hugepages.sh'
 
-# ==> Configure huge pages
-- name: configure kernel for hugepages
-  sysctl: name="vm.nr_hugepages" value="{{ hugepages_nr }}" state=present
-  tags:
-    - hugepages
+- name: Remove the script
+  file: path='/tmp/disable_trans_hugepages.sh' state=absent
+
+- name: Configure kernel for hugepages
+  sysctl: name='vm.nr_hugepages' value="{{ sys_config.hugepages_nr }}" state=present

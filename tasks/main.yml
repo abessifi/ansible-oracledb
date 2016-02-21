@@ -1,14 +1,45 @@
 ---
 
-- include: preinstall.yml
+# Fix /etc/hosts file. Remove hostname from local loop.
+# This is a workaround for vagrant adding hostname to local loop.
+- name: Fix host file entry for '127.0.0.1' address
+  lineinfile:
+    dest: '/etc/hosts'
+    regexp: '^127\.0\.0\.1'
+    line: '127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4'
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
 
-- include: install.yml
+- name: Configure Linux to host Oracle Database
+  include: preinstall.yml
+  become: yes
 
-# ==> Fix hosts file. Remove hostname from local loop. A workaround for vagrant
-# adding hostname to local loop
-- name: fix host file 127.0.0.1 entry
-  lineinfile: >
-    dest=/etc/hosts
-    regexp='^127\.0\.0\.1'
-    line='127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4'
-    owner=root group=root mode=0644
+- name: Installs the Oracle Database
+  include: install.yml
+  become: yes
+  become_user: "{{ oracle_system_user }}"
+
+# Reboot the server in order that SELinux changes take effect.
+# You can remove it for non vagrant server.
+- name: Reboot Vagrant virtual machine
+  local_action: 'shell vagrant reload --no-provision'
+  ignore_errors: yes
+  tags:
+    - reboot-vm
+
+- name: Create trigger for autostart pluggable db's
+  copy:
+    src: 'start-pluggable-dbs.sh'
+    dest: "{{ oracle_installation_dir }}/"
+    mode: 755
+  tags:
+    - start-pluggable-db
+
+- name: Run start-pluggable-dbs.sh script
+  shell: "{{ installation_folder }}/start-pluggable-dbs.sh"
+  tags:
+    - start-pluggable-db
+
+

@@ -1,31 +1,44 @@
 ---
 
-install_db: INSTALL_DB_SWONLY
-oracle_hostname: '{{ server_hostname }}'
-inventory_os_group: '{{ oracle_install_group }}'
-inventory_location: '{{ oracle_base }}/inventory'
-oracle_home: '{{ oracle_base }}/{{ oracle_user }}/product/{{ oracle_install_version }}/{{ dbhome_name }}'
-
-
-oracle_user: oracle
-oracle_install_group: oinstall
-oracle_base: /oracle/app
-
-installer_archives:
+oracle_version: '12.1.0.2'
+oracle_edition: 'EE'
+oracle_system_user_password: '$6$P7jw3OaWKdR$tRSRPjTey.SPqhyLBxOKbm9k21MEYF6jHDUH2O03RPvISDVnkGqWNg1W6iJqZhqD3ErbdJZqUEuNnEuoAWHWO/'
+oracle_base_dir: "/u01/app"
+oracle_installation_dir: '{{ oracle_base_dir }}/installation'
+oracle_archives_directory: "/tmp/oracledb_installer"
+oracle_archives_files:
   - 'linuxamd64_12102_database_1of2.zip'
   - 'linuxamd64_12102_database_2of2.zip'
-oracle_install_version: '12102'
-dbhome_name: 'dbhome_1'
-oracle_edition: 'EE'
 
-oracle_dataloc: '{{ oracle_base }}/oradata'
-oracle_recoveryloc: '{{ oracle_base }}/recovery_area'
+oracle_server_hostname: "{{ ansible_hostname }}"
+oracle_db_name: 'oradb'
+oracle_home_dir: "{{ oracle_base_dir }}/{{ oracle_system_user }}/product/{{ oracle_version }}/{{ oracle_db_name }}"
 
-installation_folder: '{{ oracle_base}}/installation'
-server_hostname: '{{ ansible_fqdn }}'
+# Configuration variables for Oralce instance and database installation
+oracle_install:
+  mode: 'INSTALL_DB_SWONLY'
+  instance_name: 'orainst'
+  db_type: 'GENERAL_PURPOSE'
+  db_globalname: 'starter.oradb.private'
+  db_sid: 'ora'
+  db_listener_port: 1521
+  em_express_port: 5500
+  config_as_container_db: 'true'
+  pdb_name: 'pdb_01'
+  db_charset: 'AL32UTF8'
+  memory_option: 'false'
+  memory_mb: 1536
+  install_samples: 'false'
+  sys_dba_username: 'sys'
+  starter_db_common_password: 'oracle'
+  management_option: 'DEFAULT'
+  enable_recovery: 'true'
+  storage_type: 'FILE_SYSTEM_STORAGE'
+  inventory_location: "{{ oracle_base_dir }}/inventory"
+  data_location: "{{ oracle_base_dir }}/oradata"
+  recovery_location: "{{ oracle_base_dir }}/recovery_area"
+  decline_security_updates: 'no'
+  create_cdb: 'true'
+  total_pdbs: '1'
+  pdb_prefix: 'pdb'
 
-#
-# Secrets
-#
-oracle_os_user_pass: '$6$P7jw3OaWKdR$tRSRPjTey.SPqhyLBxOKbm9k21MEYF6jHDUH2O03RPvISDVnkGqWNg1W6iJqZhqD3ErbdJZqUEuNnEuoAWHWO/'
-oracle_pass_all_users: oracle

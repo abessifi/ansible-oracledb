@@ -4,9 +4,9 @@ This is an `Ansible` role to configure a CentOS/RHEL/Oracle Linux 7.1 server wit
 
 ## Role variable
 
-- `oracledb_version` - Oracle database version (default: `12102`).
-- `oracledb_archives_directory` - Path to temporary directory where to download installer archives (default: `/tmp/oracledb_12102_installer`).
-- `oracledb_archives_files` - List of downloaded archives files within then `oracledb_archives_directory` temporary forlder.
+- `oracle_version` - Oracle database version (default: `12.1.0.2`)ignore_errors: true
+- `oracle_archives_directory` - Path to temporary directory where to download installer archives (default: `/tmp/oracledb_installer`).
+- `oracle_archives_files` - List of downloaded archives files within then `oracledb_archives_directory` temporary forlder.
 
 ## Usage
 
@@ -25,9 +25,9 @@ and put them into `oracledb_archives_directory` folder and update the `oracledb_
 
 	$ vagrant up
 
-After a few minutes a virtual machine with Oracle Database will be ready for you without any further configuration. You can access the Enterprise Manager Express using `sys/sysdba` and `oracle` as password.
+After a few minutes a virtual machine with Oracle Database will be ready for you without any further configuration. You can access the Enterprise Manager Express using `sys` (default sys dba username)  and `oracle` as password:
 
-	https://the_vm_fqdn:5500/em
+https://the_vm_fqdn:5500/em
 
 You can shutdown the virtual machine using:
 
@@ -37,4 +37,4 @@ You can destroy it (delete from disk) using:
 
 	$ vagrant destroy
 
-password for Oracle Operating system user is `welcome1`.
+Password for `oracle` system user is `welcome1`.

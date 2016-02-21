@@ -1,16 +1,5 @@
 ---
 
-- name: Configure Oracle Linux 7 with Oracle Database 12c
-  hosts: oracle-db
+- hosts: oracle-db
   roles:
     - role: ansible-oracledb
-
-    #pre_tasks:
-    # ==> Fix hosts file. Remove hostname from local loop. A workaround for vagrant
-    # adding hostname to local loop
-    # - name: fix host file 127.0.0.1 entry
-    #   lineinfile: >
-    #     dest=/etc/hosts
-    #     regexp='^127\.0\.0\.1'
-    #     line='127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4'
-    #     owner=root group=root mode=0644

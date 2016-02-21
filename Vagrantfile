@@ -27,7 +27,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       ansible.playbook = 'provision.yml'
       ansible.inventory_path = 'vagrant-inventory.ini'
       ansible.limit = 'oracle-db'
-      ansible.verbose = 'vvv'
+      ansible.raw_arguments = [ "--skip-tags=start-pluggable-db,reboot-vm" ]
+      ansible.verbose = 'v'
     end
   end
 

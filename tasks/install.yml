@@ -1,87 +1,100 @@
-################################################################################
-# ==> Tasks for oracle-install role. This role installs the Oracle Database
-# ==> 12c software, configure a database, listener and ex express
-# ==> author: Christos Vezalis
-################################################################################
+---
 
 - name: Create folder for installation files
-  file: state=directory path={{ installation_folder }}
-# ==> Copy installer files
+  file: path={{ oracle_installation_dir }} state=directory
+
 - name: Copy installer files
-  copy: src={{ item }} dest='{{ installation_folder }}/'
-  with_items: '{{ installer_archives }}'
+  copy: src="{{ oracle_archives_directory }}/{{ item }}" dest="{{ oracle_installation_dir }}/"
+  with_items: "{{ oracle_archives_files }}"
 
-# ==> extract files
+- name: Check if the installer is unarchived
+  stat: path="{{ oracle_installation_dir }}/database"
+  register: installer_dir
+
 - name: Extract installation files
-  command: 'unzip -o {{ installation_folder }}/{{ item }} -d {{ installation_folder }}/'
-  with_items: '{{ installer_archives }}'
+  unarchive:
+    copy: no
+    src: "{{ oracle_installation_dir }}/{{ item }}"
+    dest: "{{ oracle_installation_dir }}"
+  with_items: "{{ oracle_archives_files }}"
+  when: not installer_dir.stat.exists
 
-# ==> generate response file
+- name: Check if the database is installed
+  stat: path="{{ oracle_home_dir }}"
+  register: db_home_dir
+
 - name: Gerenerate the response file for software only installation
-  template: src=db_install.rsp.j2 dest={{ installation_folder }}/db_install.rsp
+  template: src=db_install.rsp.j2 dest="{{ oracle_installation_dir }}/db_install.rsp"
 
-# ==> execute installation
-- name: Install Product
-  command: '{{ installation_folder}}/database/runInstaller -silent -ignorePrereq -ignoreSysPrereqs -waitforcompletion -responseFile {{ installation_folder }}/db_install.rsp'
+- name: Install Oracle Database Server
+  shell: "{{ oracle_installation_dir }}/database/runInstaller -silent -ignorePrereq -ignoreSysPrereqs -waitforcompletion -responseFile {{ oracle_installation_dir }}/db_install.rsp"
+  when: not db_home_dir.stat.exists
 
-# ==> execute Inventory command as root
 - name: Execute Inventoty root command
-  command: '{{ inventory_location }}/orainstRoot.sh'
-  sudo_user: root
+  shell: "{{ oracle_install.inventory_location }}/orainstRoot.sh"
+  become_user: root
 
-# ==> execute DB home command as root
-- name: Execute DB home rfoot command
-  command: '{{ oracle_home }}/root.sh'
-  sudo_user: root
+- name: Execute DB home root command
+  shell: "{{ oracle_home_dir }}/root.sh"
+  become_user: root
 
-# ==> TODO: Create a new role for creating the database
-# ==> Create Listener TODO: Parameterize port, name etc
-- name: copy listener response file
-  template: src=netca.rsp.j2 dest={{ installation_folder }}/netca.rsp
+# TODO:
+# - Create a new role for creating the database
+# - Listener: Parameterize port, name etc
+- name: Copy listener and dbca response files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: 'netca.rsp.j2', dest: "{{ oracle_installation_dir }}/netca.rsp" }
+    - { src: 'dbca.rsp.j2', dest: "{{ oracle_installation_dir }}/dbca.rsp" }
 
-- name: Create listener using netca
-  command: '{{ oracle_home }}/bin/netca -silent -responseFile {{ installation_folder }}/netca.rsp'
+- name: Check if the listener is configured already
+  stat: path="{{ oracle_home_dir }}/network/admin/listener.ora"
+  register: listener_config_file
 
-- name: copy response file for dbca
-  template: src=dbca.rsp.j2 dest={{ installation_folder }}/dbca.rsp
+- name: Create db listener using netca
+  shell: "{{ oracle_home_dir }}/bin/netca -silent -responseFile {{ oracle_installation_dir }}/netca.rsp"
+  when: not listener_config_file.stat.exists
 
-- name: create database
-  command: '{{ oracle_home }}/bin/dbca -silent -responseFile {{ installation_folder }}/dbca.rsp'
+- name: Check if the data location dir exists already
+  stat: path="{{ oracle_install.data_location }}"
+  register: data_location_dir
 
-- name: create oracle home variable
-  lineinfile: dest='/home/{{ oracle_user }}/.bashrc' line='export ORACLE_HOME={{ oracle_home }}'
+- name: Create database using dbca
+  shell: "{{ oracle_home_dir }}/bin/dbca -silent -responseFile {{ oracle_installation_dir }}/dbca.rsp"
+  when: not data_location_dir.stat.exists
 
-- name: create oracle sid variable
-  lineinfile: dest='/home/{{ oracle_user }}/.bashrc' line='export ORACLE_SID={{ oracle_sid }}'
+- name: Create oracle ORACLE_HOME/ORACLE_SID/PATH environment variables
+  lineinfile:
+    dest: "/home/{{ oracle_system_user }}/.bashrc"
+    line: "{{ item }}"
+  with_items:
+    - "export ORACLE_HOME={{ oracle_home_dir }}"
+    - "export ORACLE_SID={{ oracle_install.db_sid }}"
+    - "export PATH=$PATH:$ORACLE_HOME/bin"
 
-- name: add oracle home bin folder
-  lineinfile: dest='/home/{{ oracle_user }}/.bashrc' line='export PATH=$PATH:$ORACLE_HOME/bin'
+- name: Check if /etc/oratab is up to date
+  shell: "grep -c '^{{ oracle_install.db_sid }}:{{ oracle_home_dir }}:N' /etc/oratab"
+  register: search_oratab_entry
+  ignore_errors: true
 
-- name: change oratab
-  lineinfile: dest='/etc/oratab' regexp='^{{ oracle_sid }}:{{ oracle_home }}:N' line='{{ oracle_sid }}:{{ oracle_home }}:Y'
-  sudo_user: root
+- name: Change/Update oratab file
+  lineinfile:
+    dest: '/etc/oratab'
+    regexp: "^#?{{ oracle_install.db_sid }}:{{ oracle_home_dir }}:N"
+    line: "{{ oracle_install.db_sid }}:{{ oracle_home_dir }}:Y"
+  become_user: root
+  when: search_oratab_entry.stdout != '0'
 
-- name: copy init.d oracle script to /etc/init.d
-  template: src=oradb.j2 dest=/etc/init.d/oradb mode=750
-  sudo_user: root
+- name: Copy oracle initscript to /etc/init.d/
+  template:
+    src: 'oradb.j2'
+    dest: '/etc/init.d/oradb'
+    mode: 750
+  become_user: root
 
-- name: enable oradb script to run at startup
-  command: 'chkconfig --add oradb'
-  sudo_user: root
+- name: Enable oradb script to run at startup
+  shell: 'chkconfig --add oradb'
+  become_user: root
 
-# You can remove it for non vagrant server.
-#- name: reboot vagrant virtual machine
-#  local_action: shell vagrant reload
-#  sudo_user: '{{ host_username }}'
-#  ignore_errors: yes
-#  tags:
-#    - reboot-vagrant
-
-- name: Create trigger for autostart pluggable db's
-  copy: src=start-pluggable-dbs.sh dest={{ installation_folder }}/ mode=755
-  tags:
-    - start-pluggable
-
-- shell: '{{ installation_folder }}/start-pluggable-dbs.sh'
-  tags:
-    - start-pluggable

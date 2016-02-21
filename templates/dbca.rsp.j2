@@ -75,7 +75,7 @@ OPERATION_TYPE = "createDatabase"
 # Default value : None
 # Mandatory     : Yes
 #-----------------------------------------------------------------------------
-GDBNAME = {{ oracle_globalname }}
+GDBNAME = {{ oracle_install.db_globalname }}
 
 #-----------------------------------------------------------------------------
 # Name          : DATABASECONFTYPE
@@ -202,7 +202,7 @@ GDBNAME = {{ oracle_globalname }}
 # Default value : <db_name> specified in GDBNAME
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-SID = {{ oracle_sid }}
+SID = {{ oracle_install.db_sid }}
 
 #-----------------------------------------------------------------------------
 # Name          : CREATEASCONTAINERDATABASE 
@@ -212,7 +212,7 @@ SID = {{ oracle_sid }}
 # Default value : false
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-CREATEASCONTAINERDATABASE = {{ create_container_database }}
+CREATEASCONTAINERDATABASE = {{ oracle_install.create_cdb }}
 
 #-----------------------------------------------------------------------------
 # Name          : NUMBEROFPDBS
@@ -222,7 +222,7 @@ CREATEASCONTAINERDATABASE = {{ create_container_database }}
 # Default value : 0
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-NUMBEROFPDBS = {{ number_of_pdbs }}
+NUMBEROFPDBS = {{ oracle_install.total_pdbs }}
 
 #-----------------------------------------------------------------------------
 # Name          : PDBNAME 
@@ -232,7 +232,7 @@ NUMBEROFPDBS = {{ number_of_pdbs }}
 # Default value : None
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-PDBNAME = {{ pdb_prefix }}
+PDBNAME = {{ oracle_install.pdb_prefix }}
 
 #-----------------------------------------------------------------------------
 # Name          : PDBADMINPASSWORD
@@ -242,7 +242,7 @@ PDBNAME = {{ pdb_prefix }}
 # Default value : None
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-PDBADMINPASSWORD = {{ oracle_pass_all_users }}
+PDBADMINPASSWORD = {{ oracle_install.starter_db_common_password }}
 
 #-----------------------------------------------------------------------------
 # Name          : NODELIST
@@ -283,7 +283,7 @@ TEMPLATENAME = "General_Purpose.dbc"
 # Default value : None
 # Mandatory     : Yes
 #-----------------------------------------------------------------------------
-SYSPASSWORD = {{ oracle_pass_all_users }}
+SYSPASSWORD = {{ oracle_install.starter_db_common_password }}
 
 #-----------------------------------------------------------------------------
 # Name          : SYSTEMPASSWORD
@@ -293,7 +293,7 @@ SYSPASSWORD = {{ oracle_pass_all_users }}
 # Default value : None
 # Mandatory     : Yes
 #-----------------------------------------------------------------------------
-SYSTEMPASSWORD = {{ oracle_pass_all_users }}
+SYSTEMPASSWORD = {{ oracle_install.starter_db_common_password }}
 
 #-----------------------------------------------------------------------------
 # Name          : SERVICEUSERPASSWORD
@@ -324,7 +324,7 @@ EMCONFIGURATION = DBEXPRESS
 # Mandatory     : No, will be picked up from DBEXPRESS_HTTPS_PORT env variable
 #                 or auto generates a free port between 5500 and 5599
 #-----------------------------------------------------------------------------
-EMEXPRESSPORT = "5500"
+EMEXPRESSPORT = "{{ oracle_install.em_express_port }}"
 
 
 #-----------------------------------------------------------------------------
@@ -414,7 +414,7 @@ DVOWNERNAME = "dvsys"
 # Default value : None
 # Mandatory     : Yes, if DataVault option is chosen
 #-----------------------------------------------------------------------------
-DVOWNERPASSWORD = {{ oracle_pass_all_users }}
+DVOWNERPASSWORD = {{ oracle_install.starter_db_common_password }}
 
 #-----------------------------------------------------------------------------
 # Name          : DVACCOUNTMANAGERNAME
@@ -434,7 +434,7 @@ DVACCOUNTMANAGERNAME = "dvmanager"
 # Default value : None
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-DVACCOUNTMANAGERPASSWORD = {{ oracle_pass_all_users }}
+DVACCOUNTMANAGERPASSWORD = {{ oracle_install.starter_db_common_password }}
 
 #-----------------------------------------------------------------------------
 # Name          : OLSCONFIGURATION
@@ -464,7 +464,7 @@ DVACCOUNTMANAGERPASSWORD = {{ oracle_pass_all_users }}
 # Default value : $ORACLE_BASE/oradata
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-DATAFILEDESTINATION = {{ oracle_dataloc }}
+DATAFILEDESTINATION = {{ oracle_install.data_location }}
 
 #-----------------------------------------------------------------------------
 # Name          : RECOVERYAREADESTINATION
@@ -474,7 +474,7 @@ DATAFILEDESTINATION = {{ oracle_dataloc }}
 # Default value : $ORACLE_BASE/flash_recovery_area
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-RECOVERYAREADESTINATION= {{ oracle_recoveryloc }}
+RECOVERYAREADESTINATION= {{ oracle_install.recovery_location }}
 
 #-----------------------------------------------------------------------------
 # Name          : STORAGETYPE
@@ -522,7 +522,7 @@ RECOVERYAREADESTINATION= {{ oracle_recoveryloc }}
 # Default value : "US7ASCII"
 # Mandatory     : NO
 #-----------------------------------------------------------------------------
-CHARACTERSET = {{ oracle_charset }}
+CHARACTERSET = {{ oracle_install.db_charset }}
 
 #-----------------------------------------------------------------------------
 # Name          : NATIONALCHARACTERSET
@@ -568,7 +568,7 @@ NATIONALCHARACTERSET= "UTF8"
 #		  You can also specify the password at the command prompt instead of here.
 # Mandatory     : YES, if the value of registerWithDirService is TRUE
 #-----------------------------------------------------------------------------
-WALLETPASSWORD= {{ oracle_pass_all_users }}
+WALLETPASSWORD= {{ oracle_install.starter_db_common_password }}
 
 #-----------------------------------------------------------------------------
 # Name          : LISTENERS
@@ -618,7 +618,7 @@ WALLETPASSWORD= {{ oracle_pass_all_users }}
 # Default value : FASLE
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-SAMPLESCHEMA={{ oracle_install_samples }}
+SAMPLESCHEMA = "{{ oracle_install.install_samples }}"
 
 #-----------------------------------------------------------------------------
 # Name          : MEMORYPERCENTAGE
@@ -657,7 +657,7 @@ AUTOMATICMEMORYMANAGEMENT = "FALSE"
 # Default value : 
 # Mandatory     : NO
 #-----------------------------------------------------------------------------
-TOTALMEMORY = {{ oracle_memory_mb }}
+TOTALMEMORY = {{ oracle_install.memory_mb }}
 
 
 #-----------------------*** End of CREATEDATABASE section ***------------------------
@@ -674,7 +674,7 @@ TOTALMEMORY = {{ oracle_memory_mb }}
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-SOURCEDB = "myhost:1521:orcl"
+SOURCEDB = "{{ oracle_server_hostname }}:{{ oracle_install.db_listener_port }}:{{ oracle_install.db_sid }}"
 
 #-----------------------------------------------------------------------------
 # Name          : SYSDBAUSERNAME 
@@ -718,7 +718,7 @@ TEMPLATENAME = "My Copy TEMPLATE"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-SOURCEDB = "orcl"
+SOURCEDB = "{{ oracle_install.db_sid }}"
 
 #-----------------------------------------------------------------------------
 # Name          : SYSDBAUSERNAME
@@ -772,7 +772,7 @@ TEMPLATENAME = "My Clone TEMPLATE"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-SOURCEDB = "orcl"
+SOURCEDB = "{{ oracle_install.db_sid }}"
 
 #-----------------------------------------------------------------------------
 # Name          : SYSDBAUSERNAME
@@ -817,7 +817,7 @@ TEMPLATENAME = "New Database"
 # Default value : None
 # Mandatory     : Yes
 #-----------------------------------------------------------------------------
-GDBNAME = "orcl12.us.oracle.com"
+GDBNAME = "{{ oracle_install.db_globalname }}"
 
 #-----------------------------------------------------------------------------
 # Name          : SCRIPTDESTINATION 
@@ -1058,7 +1058,7 @@ GDBNAME = "orcl12.us.oracle.com"
 # Default value : None
 # Mandatory     : Yes
 #-----------------------------------------------------------------------------
-DB_UNIQUE_NAME = "orcl12c.us.oracle.com"
+DB_UNIQUE_NAME = "{{ oracle_install.db_globalname }}"
 
 #-----------------------------------------------------------------------------
 # Name          : INSTANCENAME
@@ -1098,7 +1098,7 @@ NODENAME=
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-SYSDBAUSERNAME = "sys"
+SYSDBAUSERNAME = "{{ oracle_install.sys_dba_username }}"
 
 #-----------------------------------------------------------------------------
 # Name          : SYSDBAPASSWORD 
@@ -1134,7 +1134,7 @@ SYSDBAUSERNAME = "sys"
 # Default value : None
 # Mandatory     : Yes
 #-----------------------------------------------------------------------------
-DB_UNIQUE_NAME = "orcl12c.us.oracle.com"
+DB_UNIQUE_NAME = "{{ oracle_install.db_globalname }}"
 
 #-----------------------------------------------------------------------------
 # Name          : INSTANCENAME
@@ -1144,7 +1144,7 @@ DB_UNIQUE_NAME = "orcl12c.us.oracle.com"
 # Default value : None
 # Mandatory     : Yes
 #-----------------------------------------------------------------------------
-INSTANCENAME = "orcl12c"
+INSTANCENAME = "{{ oracle_install.instance_name }}"
 
 #-----------------------------------------------------------------------------
 # Name          : NODENAME
@@ -1173,7 +1173,7 @@ INSTANCENAME = "orcl12c"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-SYSDBAUSERNAME = "sys"
+SYSDBAUSERNAME = "{{ oracle_install.sys_dba_username }}"
 
 #-----------------------------------------------------------------------------
 # Name          : SYSDBAPASSWORD 
@@ -1199,7 +1199,7 @@ SYSDBAUSERNAME = "sys"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-SOURCEDB = "orcl"
+SOURCEDB = "{{ oracle_install.db_sid }}"
 
 #----------------------------------------------------------------------------------
 # Name          : PDBNAME
@@ -1209,7 +1209,7 @@ SOURCEDB = "orcl"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-PDBNAME = "PDB1"
+PDBNAME = "{{ oracle_install.pdb_name }}"
 
 #----------------------------------------------------------------------------------
 # Name          : CREATEASCLONE
@@ -1475,7 +1475,7 @@ PDBNAME = "PDB1"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-SOURCEDB = "orcl"
+SOURCEDB = "{{ oracle_install.db_sid }}"
 
 #----------------------------------------------------------------------------------
 # Name          : PDBNAME
@@ -1485,7 +1485,7 @@ SOURCEDB = "orcl"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-PDBNAME = "PDB1"
+PDBNAME = "{{ oracle_install.pdb_name }}"
 
 #----------------------------------------------------------------------------------
 # Name          : ARCHIVETYPE
@@ -1575,7 +1575,7 @@ ARCHIVETYPE = "TAR"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-SOURCEDB = "orcl"
+SOURCEDB = "{{ oracle_install.db_sid }}"
 
 #----------------------------------------------------------------------------------
 # Name          : PDBNAME
@@ -1585,7 +1585,7 @@ SOURCEDB = "orcl"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-PDBNAME = "PDB1"
+PDBNAME = "{{ oracle_install.pdb_name }}"
 
 #-----------------------*** End of deletePluggableDatabase section ***------------------------
 
@@ -1601,7 +1601,7 @@ PDBNAME = "PDB1"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-SOURCEDB = "orcl"
+SOURCEDB = "{{ oracle_install.db_sid }}"
 
 #----------------------------------------------------------------------------------
 # Name          : PDBNAME
@@ -1611,7 +1611,7 @@ SOURCEDB = "orcl"
 # Default value : none
 # Mandatory     : YES
 #-----------------------------------------------------------------------------
-PDBNAME = "PDB1"
+PDBNAME = "{{ oracle_install.pdb_name }}"
 
 #-----------------------------------------------------------------------------
 # Name          : DVCONFIGURATION
