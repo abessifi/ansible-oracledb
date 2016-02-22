@@ -21,6 +21,14 @@
   become: yes
   become_user: "{{ oracle_system_user }}"
 
+- name: Remove installation directory
+  file:
+    path: "{{ oracle_installation_dir }}"
+    state: absent
+  become: yes
+  tags:
+    - remove-installer
+
 # Reboot the server in order that SELinux changes take effect.
 # You can remove it for non vagrant server.
 - name: Reboot Vagrant virtual machine
@@ -41,5 +49,4 @@
   shell: "{{ installation_folder }}/start-pluggable-dbs.sh"
   tags:
     - start-pluggable-db
-
 
