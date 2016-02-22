@@ -30,7 +30,7 @@
   shell: "{{ oracle_installation_dir }}/database/runInstaller -silent -ignorePrereq -ignoreSysPrereqs -waitforcompletion -responseFile {{ oracle_installation_dir }}/db_install.rsp"
   when: not db_home_dir.stat.exists
 
-- name: Execute Inventoty root command
+- name: Execute Inventory root command
   shell: "{{ oracle_install.inventory_location }}/orainstRoot.sh"
   become_user: root
 
@@ -38,9 +38,6 @@
   shell: "{{ oracle_home_dir }}/root.sh"
   become_user: root
 
-# TODO:
-# - Create a new role for creating the database
-# - Listener: Parameterize port, name etc
 - name: Copy listener and dbca response files
   template:
     src: "{{ item.src }}"
